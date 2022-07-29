@@ -14,6 +14,10 @@ A aplicação permite o cálculo da oferta necessária para: 1) controlar e para
 Para utilização da aplicação, deve-se salvar na pasta bases a base de dados com a série histórica dos procedimentos especializados (nomeada como "base_procedimento", em formato .csv e com as seguintes colunas: grupo, procedimento, mes_solicitacao (no formato "%Y-%m-%d") e quantidade).
 
 Os parâmetros para utilização são:
+1) Selecione o Grupo - Possibilita a seleção de um grupo de procedimentos, para facilitar a busca por um procedimento específico.
+2) Selecione o Procedimento - Permite a seleção de qual ou quais procedimentos devem ter sua demanda prevista.
+3) Transformação de Box-Cox(lambda) - Permite a seleção de lambdas para a transformação da série histórica, se necessário. Lambada = NULO significa que não será aplicada nenhuma transformação. Lambda = 0 produz transformação logarítmica. 
+4) Período desejado para previsão - Possibilita a definição de qual o número de meses de previsão necessários.
 
 
 ## Reutilização do código
