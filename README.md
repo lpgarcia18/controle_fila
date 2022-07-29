@@ -13,7 +13,7 @@ A aplicação permite o cálculo da oferta necessária para: 1) controlar e para
 ## Como utilizar
 
 
-##Reutilização do código
+## Reutilização do código
 A aplicação está licenciada sob GLP 3.0 (https://github.com/lpgarcia18/controle_fila/blob/main/LICENSE), de modo a permitir sua reutilização por outros municípios e o desenvolvimento conjuto. 
 
 Sugestões e contribuições são muito bem vindas.
