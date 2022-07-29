@@ -10,6 +10,11 @@ Esse instrumento pretende auxiliar gestores de saúde na estimativa de demanda p
 ## Método
 A aplicação permite projetar a demanda futura por um procedimento especializado em saúde, analisando os resultados de dois modelos: ARIMA (ou SARIMA) e ETS. Toda a análise tem o mês como unidade de medida temporal.
 
+### Limitação
+Não considera fila - Precisa ser incluida
+
+## Plataforma
+
 ## Como utilizar
 Para utilização da aplicação, deve-se salvar na pasta bases a base de dados com a série histórica dos procedimentos especializados (nomeada como "base_procedimento", em formato .csv e com as seguintes colunas: grupo, procedimento, mes_solicitacao (no formato "%Y-%m-%d") e quantidade).
 
