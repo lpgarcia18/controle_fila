@@ -11,6 +11,8 @@ Esse instrumento pretende auxiliar gestores de saúde na estimativa de demanda p
 A aplicação permite o cálculo da oferta necessária para: 1) controlar e para 2) manter o controle da fila por um determinado procedimento em saúde. Esses cálculos são feitos a partir da definição do 1) do procedimento a ser avaliado e do 2) tempo desejado para o controle. Toda a análise tem o mês como unidade de medida temporal.
 
 ## Como utilizar
+Para utilização da aplicação, deve-se salvar na pasta bases a base de dados com a série histórica dos procedimentos especializados (nomeada como "base_procedimento", em formato .csv e com as seguintes colunas: grupo, procedimento, mes_solicitacao (no formato "%Y-%m-%d") e quantidade).
+Os parâmetros para utilização são:
 
 
 ## Reutilização do código
