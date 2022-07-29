@@ -12,6 +12,7 @@ A aplicação permite o cálculo da oferta necessária para: 1) controlar e para
 
 ## Como utilizar
 Para utilização da aplicação, deve-se salvar na pasta bases a base de dados com a série histórica dos procedimentos especializados (nomeada como "base_procedimento", em formato .csv e com as seguintes colunas: grupo, procedimento, mes_solicitacao (no formato "%Y-%m-%d") e quantidade).
+
 Os parâmetros para utilização são:
 
 
