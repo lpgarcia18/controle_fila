@@ -11,11 +11,10 @@ library(htmltools)
 library(stringr)
 library(DT)
 library(plotly)
-library(readr)
-########################################################################################### 
-#Módulos 
-###########################################################################################
-source("modulo_serie_temporal.R")
+library(reshape2)
+library(deSolve)
+library(mondate)
+library(readxl)
 
 ########################################################################################### 
 #Dados 
@@ -24,26 +23,23 @@ source("modulo_serie_temporal.R")
 # 		   delim = ";", escape_double = FALSE, locale = locale(encoding = "WINDOWS-1252"), 
 # 		   trim_ws = TRUE)
 
-
-base <- read_csv("bases/base_procedimento.csv")
-proced_unico <- unique(base$procedimento) 
-proced_unico <- sort(proced_unico)
-proced_unico <- as.list(strsplit(proced_unico, ","))
-names_proced_unico <- unique(base$procedimento)
-names_proced_unico <- sort(names_proced_unico)
-names(proced_unico) <- names_proced_unico
-grupo_unico <- unique(base$grupo) 
-grupo_unico <- sort(grupo_unico)
-grupo_unico <- as.list(strsplit(grupo_unico, ","))
-names_grupo_unico <- unique(base$grupo)
-names_grupo_unico <- sort(names_grupo_unico)
-names(grupo_unico) <- names_grupo_unico
-min(base$mes_solicitacao)
+# 
+# base <- read_excel("bases/calculo_fila_geral_01.xlsx")
+# 
+# base$tx_retorno <- base$solic_retorno / base$solic_total
+# base$tx_falta <- base$faltas / base$solic_total
+# 
+# procedimento <- unique(base$nome_procedimento) 
+# procedimento <- as.list(strsplit(procedimento, ","))
+# names(procedimento) <- unique(base$nome_procedimento)
+########################################################################################### 
+#Módulos 
+###########################################################################################
+source("modulo_sistema_regulacao.R")
 
 ########################################################################################### 
 #UI
 ###########################################################################################
-
 ###########################################################################################
 dbHeader <- dashboardHeader(title = "SMS - Florianópolis", 
 			    tags$li(a(href = 'http://www.pmf.sc.gov.br/entidades/saude/index.php?cms=salas+de+situacao&menu=4&submenuid=152',
@@ -64,7 +60,7 @@ ui <- dashboardPage(
 	dashboardSidebar(
 		########################################################################################### 
 		sidebarMenu(
-			menuItem("Projeções",tabName = "projecao", icon = icon("dashboard")),
+			menuItem("Projeções",tabName = "projecoes", icon = icon("dashboard")),
 			menuItem("Instruções", icon = icon("question-circle"),
 				 href = "https://github.com/lpgarcia18/projecao_fila_saude"),
 			menuItem("Código-fonte", icon = icon("code"), 
@@ -138,33 +134,42 @@ ui <- dashboardPage(
 		),
 		tags$style(".fa-check {color:#B5500C}"),
 		tags$style(".fa-check-double {color:#B5500C}"),
-		tags$style(".box { background-color: rgb(255, 255, 255) !important; color: rgb(0, 0, ) !important; };"),
 		
 		tabItems(
+			########################################################################################### 
+			#Proejeção de tempo
 			###########################################################################################
-			#projeções
-			###########################################################################################
-			tabItem(tabName = "projecao", h2("Projeção de Demanda por Procedimentos de Saúde"),
-				tabPanel("Séries Temporais",
-					 serie_temporal_UI(id = "projecao_demanda",
-					 		  banco = base,
-					 		  grupo_choice = grupo_unico, 
-					 		  procedimento_choice = proced_unico)
+			tabItem(tabName = "projecoes", h3("Projeção de Demanda por Procedimentos Especializados"),
+				br(),
+				hr(),
+				br(),
+				tabPanel("Projeção de Demanda",
+					 sistema_regulacao_UI(id = "proj_demanda", 
+					 		     base_serie = base_serie, 
+					 		     base_situacao = base_situacao,
+					 		     grupo_choice = grupo_demanda, 
+					 		     procedimento_choice = procedimento_demanda,
+					 		     tipo_proj_choice = tipo_proj)
 				)
 			)
 		)
 	)
 )
 
+
+
 ########################################################################################### 
 server <- function(input, output, session) {
 	###########################################################################################
-	serie_temporal_SERV(id = "projecao_demanda", banco = base)
+	
+	sistema_regulacao_SERV(id = "proj_demanda", base_situacao, base_serie)
 	
 }
 
+#Analisar o que tem demanda reprimida e capacidade sobrando (precisa dos dados do número de profissionais)
+
+
 ###########################################################################################
-#AplicaÃ§Ã£o
+#Aplicação
 ###########################################################################################
 shinyApp(ui, server)
-			

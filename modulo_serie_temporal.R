@@ -40,7 +40,7 @@ serie_temporal_UI <- function(id, banco, grupo_choice, procedimento_choice){
 				       column(6,
 				              #Selecionando o Procedimento
 				              selectInput(inputId = ns("procedimento_proj"),
-				              	    label = "Selecione a Procedimento",
+				              	    label = "Selecione o Procedimento",
 				              	    choices = procedimento_choice,
 				              	    selected = procedimento_choice[1], 
 				              	    multiple = TRUE)
@@ -126,8 +126,8 @@ serie_temporal_SERV <- function(id, banco){
 			banco_pre <- reactive({         
 				banco_prep <- banco_preparado_proj() %>%
 					dplyr::group_by(mes_solicitacao) %>%
-					dplyr::summarise(quantidade = sum(quantidade, na.rm = T))
-				banco_prep <- banco_prep$quantidade
+					dplyr::summarise(solicitacao = sum(solicitacao, na.rm = T))
+				banco_prep <- banco_prep$solicitacao
 				banco_prep <- ts(banco_prep, start = c(as.numeric(format(inicio(), format = "%Y")), as.numeric(format(inicio(), format = "%m"))), frequency = 12)
 				banco_prep 
 			})        
@@ -214,7 +214,7 @@ serie_temporal_SERV <- function(id, banco){
 			#Gráfico de sazolnalidade 
 			output$sazonal_banco <- renderPlot({
 				ggsubseriesplot(banco_pre())+
-					ylab("Quantidade")
+					ylab("Solicitação")
 			})
 			
 			#Tabela de Dados
@@ -225,7 +225,7 @@ serie_temporal_SERV <- function(id, banco){
 						grupo,
 						procedimento,
 						mes_solicitacao,
-						quantidade
+						solicitacao
 					)
 				
 				names(tabela_real) <- c(
