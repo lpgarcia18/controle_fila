@@ -127,9 +127,9 @@ ui <- dashboardPage(
                           /* body */
                           .content-wrapper, .right-side {
                           background-color: rgb(147,181,198);
-                         
 
-#                           '))),
+#                           ')
+		)),
 		tags$style(".small-box.bg-blue { background-color: rgb(18, 34, 59) !important; color: rgb(255,255,255) !important; };"
 		),
 		tags$style(".fa-check {color:#B5500C}"),

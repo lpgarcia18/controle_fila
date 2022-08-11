@@ -115,8 +115,10 @@ sistema_regulacao_UI <- function(id, base_situacao, base_serie, grupo_choice, pr
 			       	    	 DT::dataTableOutput(ns("dados_real"), width = "100%", height = 660)))))),
 		fluidRow(column(width = 12,
 				tabBox(title = "Parâmetros", width=12, height = 300,
-				       column(width = 8, 
+				       column(width = 4, 
 				              tableOutput(outputId = ns("table_demanda"))),
+				       column(width = 4, 
+				              plotlyOutput(outputId = ns("pessoas_fila"),height = 250)),
 				       column(width = 4, 
 				              plotlyOutput(outputId = ns("fila_demanda"),height = 250))))),
 		fluidRow(column(width = 12,
@@ -189,7 +191,7 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 				       funcets <- ets(banco_pre(), lambda = NULL),
 				       funcets <- ets(banco_pre(), lambda = input$lambda_banco))
 				fets <- function(x, h) {
-					forecast(funcets, h = 1)
+					forecast(funcets, h = projecao)
 				}
 				
 				##Função para ARIMA
@@ -197,14 +199,14 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 				       funcarima<- auto.arima(banco_pre(), lambda = NULL),
 				       funcarima<- auto.arima(banco_pre(), lambda = input$lambda_banco))
 				farima <- function(x, h) {
-					forecast(funcarima, h = 1)
+					forecast(funcarima, h = projecao)
 				}
 				
 				## Compute CV errors for ETS as e1
-				e1 <- tsCV(banco_pre(), fets, h=1)
+				e1 <- tsCV(banco_pre(), fets, h=projecao)
 				
 				## Compute CV errors for ARIMA as e2
-				e2 <- tsCV(banco_pre(), farima, h=1)
+				e2 <- tsCV(banco_pre(), farima, h=projecao)
 				
 				## Find MSE of each model class
 				g<-mean(e1^2, na.rm=TRUE)
@@ -318,7 +320,10 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 					      base_proced_selec = base_proced_selec, 
 					      tempo_grafico = tempo_grafico,
 					      procedimento_para_controle = procedimento_para_controle,
-					      procedimento_manutencao = procedimento_manutencao)
+					      procedimento_manutencao = procedimento_manutencao,
+					      fila = fila,
+					      procedimento_para_controle_int = procedimento_para_controle_int,
+					      solicitacao_proj = solicitacao_proj)
 				combo
 				
 			}) #fim da reactive
@@ -326,7 +331,7 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 			
 			
 			######################################################################################
-			#Outputs Nessecidade
+			#Outputs Necessidade
 			######################################################################################	
 			#Tabela 	
 			output$table_demanda <- renderTable({
@@ -341,7 +346,7 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 					)
 			})	
 			
-			# #Gráfico
+			# #Gráfico - Tempo de espera
 			output$fila_demanda <- renderPlotly({
 				
 				combo <- combo_output()
@@ -364,6 +369,35 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 				
 				
 			})
+			
+			
+			# #Gráfico - Pessoas na fila
+			output$pessoas_fila <- renderPlotly({
+				
+				combo <- combo_output()
+				tempo <- combo$iteracoes
+				tempo_para_controle <- combo$tempo_para_controle
+				fila <- combo$fila
+				procedimento_para_controle_int <- combo$procedimento_para_controle_int
+				fila <- fila[1:tempo,1:tempo,procedimento_para_controle_int] #usando a tabela que foi selecionada em tempo,procedimento_para_controle_int
+				fila <- fila[1:tempo,1] 
+				mes <- row.names(dados_fim()) 
+				solicitacao_proj <- combo$solicitacao_proj
+				fila <- cbind(fila,mes,solicitacao_proj) %>% as.data.frame()
+				fila$fila <- as.integer(as.character(fila$fila))
+				fila$solicitacao_proj <- as.integer(as.character(fila$solicitacao_proj))
+				fila$fila[1] <- fila$fila[1] - fila$solicitacao_proj[1]
+				
+				out <- data.frame(Fila = fila$fila, Controle = c(1:tempo))
+				
+				graf_tempo <- ggplot(out, aes(Controle, Fila))+
+					geom_col()+
+					geom_vline(xintercept = tempo_para_controle+1, color = "#CD6E10")+
+					theme_light()
+				
+				ggplotly(graf_tempo)
+			})
+			
 			
 			#ValueBox
 			output$controle_demanda <- renderValueBox({
@@ -403,12 +437,20 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 				autoplot(banco_prev())+
 					xlab("Ano") +
 					ylab("")+
-					ggtitle("Série Temporal - Mensal")
+					ggtitle("Série Temporal - Mensal")+
+					theme_light()
 			})
 			
 			#Gráfico dos resíduos
 			output$residuos_banco <- renderPlot({
-				checkresiduals(banco_prev())
+				with_theme <- function(expr) {
+					orig <- theme_get()
+					theme_set(theme_light())
+					force(expr)
+					theme_set(orig)
+				}
+				
+				with_theme(checkresiduals(banco_prev()))
 			})
 			
 			
@@ -421,24 +463,33 @@ sistema_regulacao_SERV <- function(id, base_situacao, base_serie){
 			
 			#Gráfico dos resíduos
 			output$residuos_banco <- renderPlot({
-				checkresiduals(banco_prev())
+				with_theme <- function(expr) {
+					orig <- theme_get()
+					theme_set(theme_light())
+					force(expr)
+					theme_set(orig)
+				}
+				
+				with_theme(checkresiduals(banco_prev()))
+				
 			})
 			
 			#Gráfico de decomposição 
 			output$decomposicao_banco <- renderPlot({
 				##Decomposição por STL
-				stl(banco_pre(), s.window="periodic", robust=TRUE) %>% autoplot()
+				stl(banco_pre(), s.window="periodic", robust=TRUE) %>% autoplot()+
+					theme_light()
 			})
 			
 			
 			#Gráfico de sazolnalidade 
 			output$sazonal_banco <- renderPlot({
 				ggsubseriesplot(banco_pre())+
-					ylab("Solicitação")
+					ylab("Solicitação")+
+					theme_light()
 			})
 			
 			#Tabela de Dados
-			
 			output$dados_real <- DT::renderDataTable({
 				tabela_real <- banco_preparado_proj() %>%
 					dplyr::select(
