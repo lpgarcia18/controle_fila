@@ -74,7 +74,7 @@ sistema_regulacao_UI <- function(id, base_situacao, base_serie, grupo_choice, pr
 			                         	inputId=ns("municipio_input"),
 			                         	label="Municipio", 
 			                         	choices= municipio_demanda,
-			                         	selected = municipio_demanda[1]))),
+			                         	selected = "Total"))),
 			              column(width = 4, 
 			                     box(width = 12,collapsible = F, 
 				              #Selecionando lambda

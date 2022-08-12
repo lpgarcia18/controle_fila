@@ -145,7 +145,7 @@ select
 	count(cd_solicitacao) as quantidade 
 from 
 	proc
-where dt_desejada < current_date -- retirando solicitacoes futuras
+--where dt_desejada < current_date -- retirando solicitacoes futuras
 group by ds_procedimento_cardio, status_agenda,	status_regulacao, municipio, tp_consulta, date_trunc('month', dt_solicitacao)
 
 union 
@@ -160,7 +160,7 @@ select
 	count(cd_solicitacao) as quantidade 
 from 
 	tipo_proc
-where dt_desejada < current_date -- retirando solcitacoes futuras
+--where dt_desejada < current_date -- retirando solcitacoes futuras
 group by ds_procedimento_cardio, status_agenda, status_regulacao, municipio, tp_consulta, date_trunc('month', dt_solicitacao)
 
 ;
